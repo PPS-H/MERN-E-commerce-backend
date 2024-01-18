@@ -32,14 +32,48 @@ export type baseQueryType = {
   price?: {
     $lte: number;
   };
-  category?: string|{
-    $regex: string;
-    $options: string;
-  };
+  category?:
+    | string
+    | {
+        $regex: string;
+        $options: string;
+      };
 };
 
 export type ControllerType = (
   req: Request,
   res: Response,
   next: NextFunction
-) => Promise<void>;
+) => Promise<void | Response<any, Record<string, any>>>;
+
+export type CacheProps = {
+  product?: boolean;
+  order?: boolean;
+};
+
+export type OrderItems = {
+  name: string;
+  photo: string;
+  price: number;
+  quantity: number;
+  productId: string;
+};
+export type ShippingInfo = {
+  address: string;
+  city: string;
+  state: string;
+  country: string;
+  pinCode: string;
+};
+
+export interface OrderProps {
+  shippingInfo: ShippingInfo;
+  user: string;
+  subtotal: number;
+  tax: number;
+  discount: number;
+  shippingCharges: number;
+  total: number;
+  status: string;
+  orderItems: OrderItems;
+}
