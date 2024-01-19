@@ -4,11 +4,13 @@ import userRoutes from "./routes/user.js";
 import productRoutes from "./routes/product.js";
 import ordersRoutes from "./routes/order.js";
 import { errorMiddleware } from "./middlewares/error.js";
+import 'dotenv/config'
 
-const port = 5000;
+const port = process.env.PORT;
 const app = express();
 
-connectToDB();
+const mongoUri=process.env.MONGO_URI
+connectToDB(mongoUri!); 
 
 app.use(express.json());
 

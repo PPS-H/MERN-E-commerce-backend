@@ -49,6 +49,10 @@ export type ControllerType = (
 export type CacheProps = {
   product?: boolean;
   order?: boolean;
+  admin?: boolean;
+  userId?: string;
+  orderId?: string;
+  productId?: string;
 };
 
 export type OrderItems = {
@@ -75,5 +79,5 @@ export interface OrderProps {
   shippingCharges: number;
   total: number;
   status: string;
-  orderItems: OrderItems;
+  orderItems: OrderItems[];
 }
