@@ -1,12 +1,17 @@
 import express from "express";
 import { connectToDB } from "./utils/features.js";
 import userRoutes from "./routes/user.js";
-import { errorMiddleware  } from "./middlewares/error.js";
+import productRoutes from "./routes/product.js";
+import ordersRoutes from "./routes/order.js";
+import couponRoutes from "./routes/payments.js";
+import { errorMiddleware } from "./middlewares/error.js";
+import 'dotenv/config'
 
-const port = 5000;
+const port = process.env.PORT;
 const app = express();
 
-connectToDB();
+const mongoUri=process.env.MONGO_URI
+connectToDB(mongoUri!); 
 
 app.use(express.json());
 
@@ -14,8 +19,17 @@ app.get("/", (req, res) => {
   res.send("API is working on /api/v1");
 });
 
-app.use("/api/v1/user", userRoutes);
 
+// User Routes 
+app.use("/api/v1/user", userRoutes);
+// Product Routes 
+app.use("/api/v1/product", productRoutes);
+// Orders Routes 
+app.use("/api/v1/orders", ordersRoutes);
+//Payments Routes
+app.use("/api/v1/payments", couponRoutes);
+
+app.use("/uploads", express.static("uploads"));
 app.use(errorMiddleware);
 
 app.listen(port, () => {
