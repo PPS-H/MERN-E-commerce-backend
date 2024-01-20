@@ -27,7 +27,7 @@ export const addNewOrder = TryCatch(
       return next(new ErrorHandler("Please provide all the order fields", 400));
     }
 
-    await Order.create({
+    const order = await Order.create({
       shippingInfo,
       user,
       subtotal,
@@ -44,6 +44,7 @@ export const addNewOrder = TryCatch(
       order: true,
       admin: true,
       userId: user,
+      productId: order.orderItems.map((element) => String(element.productId)),
     });
 
     res.status(200).json({
@@ -137,7 +138,7 @@ export const updateOrder = TryCatch(
       order: true,
       admin: true,
       userId: order.user!,
-      orderId:String(order._id)
+      orderId: String(order._id),
     });
     res.status(200).json({
       success: true,
@@ -158,8 +159,9 @@ export const deleteOrder = TryCatch(
       order: true,
       admin: true,
       userId: order.user!,
-      orderId:String(order._id)
-    });    res.status(200).json({
+      orderId: String(order._id),
+    });
+    res.status(200).json({
       success: true,
       messsage: "Order deleted successfully",
     });

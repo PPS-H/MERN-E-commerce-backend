@@ -52,7 +52,7 @@ export type CacheProps = {
   admin?: boolean;
   userId?: string;
   orderId?: string;
-  productId?: string;
+  productId?: string| string[];
 };
 
 export type OrderItems = {

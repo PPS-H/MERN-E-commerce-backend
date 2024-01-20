@@ -4,7 +4,7 @@ import { CacheProps, OrderItems } from "../types/types.js";
 import Product from "../models/product.js";
 import ErrorHandler from "./ErrorHandler.js";
 
-export const connectToDB = (uri:string) => {
+export const connectToDB = (uri: string) => {
   mongoose
     .connect(uri, {
       dbName: "MERN_Ecommerce",
@@ -25,7 +25,14 @@ export const invalidateCache = async ({
   productId,
 }: CacheProps) => {
   if (product) {
-    let productCacheKeys = [`latest-products`, `categories`, `product-${productId}`];
+    let productCacheKeys = [`latest-products`, `categories`];
+    if (typeof productId === "string") {
+      productCacheKeys.push(`product-${orderId}`);
+    }
+
+    if (typeof productId === "object") {
+      productId.forEach((element)=>productCacheKeys.push(`product-${element}`));
+    }
     cache.del(productCacheKeys);
   }
   if (order) {
@@ -49,4 +56,3 @@ export const reduceStock = async (orderItems: OrderItems[]) => {
     await product.save();
   }
 };
-

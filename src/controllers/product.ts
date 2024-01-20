@@ -10,8 +10,7 @@ import { rm } from "fs";
 import Product from "../models/product.js";
 import { isValidObjectId } from "mongoose";
 import { cache, invalidateCache } from "../utils/features.js";
-import 'dotenv/config'
-
+import "dotenv/config";
 
 // Add a new Product
 export const addNewProduct = TryCatch(
@@ -39,7 +38,7 @@ export const addNewProduct = TryCatch(
       price,
       photo: photo.path,
     });
-    await invalidateCache({product:true});
+    await invalidateCache({ product: true });
 
     res.status(200).json({
       success: true,
@@ -75,7 +74,7 @@ export const updateProduct = TryCatch(
     if (price) product.price = price;
     if (photo) product.photo = photo.path;
     product.save();
-    await invalidateCache({product:true,productId:String(product._id)});
+    await invalidateCache({ product: true, productId: String(product._id) });
 
     res.status(200).json({
       success: true,
@@ -106,7 +105,7 @@ export const getSingleProduct = TryCatch(
   async (req: Request, res: Response, next: NextFunction) => {
     let product;
     const { id } = req.params;
-    
+
     if (cache.get(`product-${id}`)) {
       product = JSON.parse(cache.get(`product-${id}`) as string);
     } else {
@@ -146,8 +145,10 @@ export const deleteProduct = TryCatch(
       return next(new ErrorHandler("Product not found", 404));
     }
 
-    await Product.deleteOne();
-    await invalidateCache({product:true,productId:String(product._id)});
+    rm(product.photo, () => {});
+
+    await product.deleteOne();
+    await invalidateCache({ product: true, productId: String(product._id) });
 
     res.status(200).json({
       success: true,
