@@ -1,8 +1,10 @@
 import express from "express";
 import { AdminOnly } from "../middlewares/auth.js";
-import { addNewCoupon, applyDiscount, deleteCouponCode, getAllCoupons } from "../controllers/payments.js";
+import { addNewCoupon, applyDiscount, createPayment, deleteCouponCode, getAllCoupons } from "../controllers/payments.js";
 
 const app = express.Router();
+
+app.post("/create",AdminOnly,createPayment);
 
 //Checking coupon code discount amount
 app.get("/discount",applyDiscount)
