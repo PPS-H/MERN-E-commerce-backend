@@ -8,6 +8,7 @@ import AdminDashboardRoutes from "./routes/dashboard.js";
 import { errorMiddleware } from "./middlewares/error.js";
 import "dotenv/config";
 import Stripe from "stripe";
+import cors from "cors";
 
 const port = process.env.PORT;
 const app = express();
@@ -17,6 +18,7 @@ const stripeKey = process.env.STRIPE_API_KEY || "";
 connectToDB(mongoUri!);
 
 app.use(express.json());
+app.use(cors());
 export const stripe = new Stripe(stripeKey);
 app.get("/", (req, res) => {
   res.send("API is working on /api/v1");
