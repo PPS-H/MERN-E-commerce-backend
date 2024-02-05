@@ -2,7 +2,42 @@ import { NextFunction, Request, Response } from "express";
 import { TryCatch } from "../middlewares/error.js";
 import ErrorHandler from "../utils/ErrorHandler.js";
 import Coupon from "../models/coupon.js";
+import { stripe } from "../app.js";
 
+//Creating Stripe Intent
+export const createPayment = TryCatch(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { amount } = req.body;
+
+    if (!amount) return next(new ErrorHandler("Please provide amount", 400));
+    const customer = await stripe.customers.create({
+      email: "customer@example.com",
+      name: "test user",
+      description: "test",
+      address: {
+        city: "Mumbtestai",
+        state: "test",
+        country: "United States", // Set the country to India for INR transactions
+        line1: "123 Main Street",
+        line2: "Apt 4",
+        postal_code: "",
+      },
+    });
+
+    const paymentIntent = await stripe.paymentIntents.create({
+      customer: customer.id,
+      amount: Number(amount) * 100,
+      currency: "inr",
+      description: "Shop Payment",
+      automatic_payment_methods: { enabled: true },
+    });
+
+    res.status(200).json({
+      success: true,
+      clientSecret: paymentIntent.client_secret,
+    });
+  }
+);
 //Adding new coupon
 export const addNewCoupon = TryCatch(
   async (req: Request, res: Response, next: NextFunction) => {

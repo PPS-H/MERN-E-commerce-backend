@@ -38,7 +38,7 @@ export const addNewProduct = TryCatch(
       price,
       photo: photo.path,
     });
-    await invalidateCache({ product: true });
+    await invalidateCache({ product: true,admin:true });
 
     res.status(200).json({
       success: true,
@@ -74,7 +74,7 @@ export const updateProduct = TryCatch(
     if (price) product.price = price;
     if (photo) product.photo = photo.path;
     product.save();
-    await invalidateCache({ product: true, productId: String(product._id) });
+    await invalidateCache({ product: true,admin:true, productId: String(product._id) });
 
     res.status(200).json({
       success: true,
@@ -92,6 +92,23 @@ export const getLatestProducts = TryCatch(
     } else {
       products = await Product.find({}).sort({ createdAt: -1 }).limit(5);
       cache.set("latest-products", JSON.stringify(products));
+    }
+    res.status(200).json({
+      success: true,
+      products,
+    });
+  }
+);
+
+// Get all products for admin
+export const getAdminProducts = TryCatch(
+  async (req: Request, res: Response, next: NextFunction) => {
+    let products;
+    if (cache.get("admin-products")) {
+      products = JSON.parse(cache.get("admin-products") as string);
+    } else {
+      products = await Product.find({});
+      cache.set("admin-products", JSON.stringify(products));
     }
     res.status(200).json({
       success: true,
@@ -127,9 +144,9 @@ export const getAllCategories = TryCatch(
   async (req: Request, res: Response, next: NextFunction) => {
     let categories;
     if (cache.get("categories")) {
-      categories = JSON.parse(cache.get("latest-products") as string);
+      categories = JSON.parse(cache.get("categories") as string);
     } else {
-      categories = await Product.distinct("category");
+      categories = await Product.distinct("category");      
       cache.set("categories", JSON.stringify(categories));
     }
     res.status(200).json({ success: true, categories });
@@ -148,7 +165,7 @@ export const deleteProduct = TryCatch(
     rm(product.photo, () => {});
 
     await product.deleteOne();
-    await invalidateCache({ product: true, productId: String(product._id) });
+    await invalidateCache({ product: true,admin:true, productId: String(product._id) });
 
     res.status(200).json({
       success: true,
