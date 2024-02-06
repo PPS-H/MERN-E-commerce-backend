@@ -2,6 +2,7 @@ import express from "express";
 import {
   addNewProduct,
   deleteProduct,
+  getAdminProducts,
   getAllCategories,
   getAllProducts,
   getLatestProducts,
@@ -15,6 +16,8 @@ const app = express.Router();
 
 // Get all Products
 app.get("/all", getAllProducts);
+// Get all Products for admin
+app.get("/adminProducts", getAdminProducts);
 // Add a new Product
 app.post("/new",AdminOnly, singleUpload, addNewProduct);
 // Get latest products

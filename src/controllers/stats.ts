@@ -43,6 +43,7 @@ export const dashboradStats = TryCatch(
           $lte: thisMonth.end,
         },
       });
+
       // Getting this month and last month products count
       const previousMonthProductsPromise = Product.find({
         createdAt: {
@@ -124,17 +125,16 @@ export const dashboradStats = TryCatch(
         (total, order) => total + (order.total || 0),
         0
       );
-
       const percentageChange = {
-        user: calculatePercentage(
+        users: calculatePercentage(
           thisMonthUsers.length,
           previousMonthUsers.length
         ),
-        product: calculatePercentage(
+        products: calculatePercentage(
           thisMonthProducts.length,
           previousMonthProducts.length
         ),
-        order: calculatePercentage(
+        orders: calculatePercentage(
           thisMonthOrders.length,
           previousMonthOrders.length
         ),
@@ -306,7 +306,7 @@ export const salesReports = TryCatch(
   async (req: Request, res: Response, next: NextFunction) => {
     let salesReports;
     if (cache.has("sales-reports")) {
-      salesReports = JSON.parse(cache.get("salesReports") as string);
+      salesReports = JSON.parse(cache.get("sales-reports") as string);
     } else {
       const today = new Date();
 

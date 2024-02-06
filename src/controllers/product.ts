@@ -100,6 +100,23 @@ export const getLatestProducts = TryCatch(
   }
 );
 
+// Get all products for admin
+export const getAdminProducts = TryCatch(
+  async (req: Request, res: Response, next: NextFunction) => {
+    let products;
+    if (cache.get("admin-products")) {
+      products = JSON.parse(cache.get("admin-products") as string);
+    } else {
+      products = await Product.find({});
+      cache.set("admin-products", JSON.stringify(products));
+    }
+    res.status(200).json({
+      success: true,
+      products,
+    });
+  }
+);
+
 // Get Single Product
 export const getSingleProduct = TryCatch(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -127,9 +144,9 @@ export const getAllCategories = TryCatch(
   async (req: Request, res: Response, next: NextFunction) => {
     let categories;
     if (cache.get("categories")) {
-      categories = JSON.parse(cache.get("latest-products") as string);
+      categories = JSON.parse(cache.get("categories") as string);
     } else {
-      categories = await Product.distinct("category");
+      categories = await Product.distinct("category");      
       cache.set("categories", JSON.stringify(categories));
     }
     res.status(200).json({ success: true, categories });

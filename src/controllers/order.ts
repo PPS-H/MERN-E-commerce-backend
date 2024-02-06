@@ -84,7 +84,7 @@ export const getSingleOrder = TryCatch(
     if (cache.has(key)) {
       order = JSON.parse(cache.get(key) as string);
     } else {
-      order = await Order.findById(id);
+      order = await Order.findById(id).populate("user", "name");
       if (!order) return next(new ErrorHandler("Order not found", 404));
       cache.set(key, JSON.stringify(order));
     }
@@ -103,7 +103,7 @@ export const allOrders = TryCatch(
     if (cache.has(key)) {
       orders = JSON.parse(cache.get(key) as string);
     } else {
-      orders = await Order.find({});
+      orders = await Order.find({}).populate("user", "name");
       if (!orders) return next(new ErrorHandler("No orders!", 404));
       cache.set(key, JSON.stringify(orders));
     }
@@ -142,7 +142,7 @@ export const updateOrder = TryCatch(
     });
     res.status(200).json({
       success: true,
-      order,
+      message:"Status updated successfully",
     });
   }
 );
@@ -163,7 +163,7 @@ export const deleteOrder = TryCatch(
     });
     res.status(200).json({
       success: true,
-      messsage: "Order deleted successfully",
+      message: "Order deleted successfully",
     });
   }
 );
