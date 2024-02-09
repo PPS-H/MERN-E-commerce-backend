@@ -11,6 +11,6 @@ const app = express.Router();
 
 app.post("/new", createUser);
 app.get("/all", AdminOnly, getAllUsers);
-app.route("/:id").get(AdminOnly, getUser).delete(AdminOnly, deleteUser);
+app.route("/:id").get(getUser).delete(AdminOnly, deleteUser);
 
 export default app;
