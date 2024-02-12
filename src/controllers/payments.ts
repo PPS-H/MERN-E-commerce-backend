@@ -48,6 +48,11 @@ export const addNewCoupon = TryCatch(
         new ErrorHandler("Please provide coupon code and discount amount", 400)
       );
 
+    const isExist = await Coupon.find({ code: coupon });
+    if (isExist.length) {
+      return next(new ErrorHandler("Coupon Code already exists", 400));
+    }
+
     await Coupon.create({ code: coupon, amount });
     res.status(200).json({
       success: true,

@@ -11,6 +11,8 @@ import Product from "../models/product.js";
 import { isValidObjectId } from "mongoose";
 import { cache, invalidateCache } from "../utils/features.js";
 import "dotenv/config";
+import { getDataUri } from "../middlewares/getUri.js";
+import cloudinary from "cloudinary";
 
 // Add a new Product
 export const addNewProduct = TryCatch(
@@ -21,24 +23,28 @@ export const addNewProduct = TryCatch(
   ) => {
     const { name, stock, price, category } = req.body;
     const photo = req.file;
-
     if (!photo) return next(new ErrorHandler("Please add product photo", 400));
-
     if (!name || !stock || !price || !category) {
-      rm(photo.path, () => {
-        console.log("File deleted");
-      });
+      // rm(photo.path, () => {
+      //   console.log("File deleted");
+      // });
       return next(new ErrorHandler("Please add all the fields", 400));
     }
+
+    const fileUri = getDataUri(photo);
+    const uploadedFile = await cloudinary.v2.uploader.upload(fileUri.content!);
 
     await Product.create({
       name,
       category: category.toLowerCase(),
       stock,
       price,
-      photo: photo.path,
+      photo: {
+        public_id: uploadedFile.public_id,
+        url: uploadedFile.url,
+      },
     });
-    await invalidateCache({ product: true,admin:true });
+    await invalidateCache({ product: true, admin: true });
 
     res.status(200).json({
       success: true,
@@ -51,30 +57,44 @@ export const addNewProduct = TryCatch(
 export const updateProduct = TryCatch(
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
-    const photo = req.file;
     const isValid = isValidObjectId(id);
     if (!isValid) {
-      if (photo) rm(photo.path, () => {});
+      // if (photo) rm(photo.path, () => {});
       return next(new ErrorHandler("Inavlid Product Id", 400));
     }
+
     const product = await Product.findById(id);
     if (!product) {
-      if (photo) rm(photo.path, () => {});
+      // if (photo) rm(photo.path, () => {});
       return next(new ErrorHandler("Product not found", 404));
     }
     const { name, category, stock, price } = req.body;
+
+    const photo = req.file;
+
     if (photo) {
-      rm(product.photo, () => {
-        console.log("Old photo deleted");
-      });
+      // rm(product.photo, () => {
+      //   console.log("Old photo deleted");
+      // });
+      const fileUri = getDataUri(photo);
+      await cloudinary.v2.uploader.destroy(product.photo!.public_id!);
+      const uploadedFile = await cloudinary.v2.uploader.upload(
+        fileUri.content!
+      );
+      product.photo!.public_id = uploadedFile.public_id;
+      product.photo!.url = uploadedFile.url;
     }
     if (name) product.name = name;
     if (category) product.category = category;
     if (stock) product.stock = stock;
     if (price) product.price = price;
-    if (photo) product.photo = photo.path;
+    // if (photo) product.photo = photo.path;
     product.save();
-    await invalidateCache({ product: true,admin:true, productId: String(product._id) });
+    await invalidateCache({
+      product: true,
+      admin: true,
+      productId: String(product._id),
+    });
 
     res.status(200).json({
       success: true,
@@ -109,6 +129,7 @@ export const getAdminProducts = TryCatch(
     } else {
       products = await Product.find({});
       cache.set("admin-products", JSON.stringify(products));
+      
     }
     res.status(200).json({
       success: true,
@@ -146,7 +167,7 @@ export const getAllCategories = TryCatch(
     if (cache.get("categories")) {
       categories = JSON.parse(cache.get("categories") as string);
     } else {
-      categories = await Product.distinct("category");      
+      categories = await Product.distinct("category");
       cache.set("categories", JSON.stringify(categories));
     }
     res.status(200).json({ success: true, categories });
@@ -162,10 +183,15 @@ export const deleteProduct = TryCatch(
       return next(new ErrorHandler("Product not found", 404));
     }
 
-    rm(product.photo, () => {});
+    // rm(product.photo, () => {});
+    await cloudinary.v2.uploader.destroy(product.photo!.public_id!);
 
     await product.deleteOne();
-    await invalidateCache({ product: true,admin:true, productId: String(product._id) });
+    await invalidateCache({
+      product: true,
+      admin: true,
+      productId: String(product._id),
+    });
 
     res.status(200).json({
       success: true,

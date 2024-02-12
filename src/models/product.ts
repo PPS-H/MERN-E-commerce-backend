@@ -7,8 +7,13 @@ const productSchema = new mongoose.Schema(
       required: [true, "Please enter product name"],
     },
     photo: {
-      type: String,
-      required: [true, "Please add product photo"],
+      public_id: {
+        type: String,
+      },
+      url: {
+        type: String,
+        required: [true, "Please add product photo"],
+      },
     },
     stock: {
       type: Number,

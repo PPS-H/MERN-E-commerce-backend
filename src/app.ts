@@ -9,6 +9,7 @@ import { errorMiddleware } from "./middlewares/error.js";
 import "dotenv/config";
 import Stripe from "stripe";
 import cors from "cors";
+import cloudinary from "cloudinary";
 
 const port = process.env.PORT;
 const app = express();
@@ -16,6 +17,12 @@ const app = express();
 const mongoUri = process.env.MONGO_URI;
 const stripeKey = process.env.STRIPE_API_KEY || "";
 connectToDB(mongoUri!);
+
+cloudinary.v2.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 app.use(express.json());
 app.use(cors());
