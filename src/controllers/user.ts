@@ -68,3 +68,29 @@ export const deleteUser = TryCatch(
     });
   }
 );
+
+// Change User Role
+export const ChangeUserRole = TryCatch(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const _id = req.params.id;
+    const { id } = req.body;
+    const user = await User.findById(_id);
+    if (!user) {
+      return next(new ErrorHandler("User not found", 400));
+    }
+    if (user.role != "admin") {
+      user.role = "admin";
+      user.save();
+
+      res.status(200).json({
+        success: true,
+        message: "User role changed to admin successfully",
+      });
+    } else {
+      res.status(400).json({
+        success: true,
+        message: "User is already a admin",
+      });
+    }
+  }
+);
